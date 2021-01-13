@@ -1,28 +1,59 @@
 import React, { Component } from 'react'
 import FacebookLogin from 'react-facebook-login'
-import { GoogleLogin } from 'react-google-login';
+import { GoogleLogin } from 'react-google-login'
+import axios from 'axios'
 
 
 
  class Auth extends Component {
       state = {
-          facebookData:[],
-          googleData:[]
+          userDetails:[]
       }
-      responseFacebook = (response) => {
-         this.setState({facebookData:response})
-         console.log(this.state.facebookData)
+      handleAuthResponse = (response) => {
+          console.log(response)
+         this.setState({userDetails:response})
+          const { name, id, email, accessToken } = this.state.userDetails;
+          console.log(this.state.userDetails)
+          console.log(name,id,email,accessToken)
+          axios.post('http://localhost:5000/users',{
+              "name":name,
+              "email":email,
+              "accessToken":accessToken,
+              "userId":id
+          }).then((res)=>{
+            console.log(res)
+          }).catch((err)=>{
+              console.log(err)
+          })
+     }
+     handleGoogleAuth = (response) =>{
+         console.log(response)
+         this.setState({ userDetails: response })
+        //  const { profileObj :{ name, googleId, email }} = this.state.userDetails;
+         const { accessToken, profileObj: { name, googleId, email}}=this.state.userDetails
+         console.log(this.state.userDetails)
+         console.log(name,googleId,email, )
+         axios.post('http://localhost:5000/users', {
+             "name": name,
+             "email": email,
+             "accessToken": accessToken,
+             "userId": googleId
+         }).then((res) => {
+             console.log(res)
+         }).catch((err) => {
+             console.log(err)
+         })
+
+
      }
 
-     responseGoogle = (response) => {
-         console.log(response);
-         this.setState({ googleData: response })
-     }
+     
+     
      
 
     render() {
         return (
-            <div className="flex flex-wrap border-black border-2 bg-gray-50 mx-40 my-20">
+            <div className="flex flex-wrap border-black border-2 bg-gray-50  md:my-20 md:mx-20">
                 <div className=" flex-1 h-auto m-8 ">
                     <div>
                         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -88,17 +119,23 @@ import { GoogleLogin } from 'react-google-login';
                 <FacebookLogin
                     appId="1385706841774995"
                     fields="name,email,picture"
-                    onClick={this.responseFacebook}
-                    callback={this.responseFacebook}
+                            onClick={this.handleAuthResponse}
+                            callback={this.handleAuthResponse}
+                    size="metro"
+                    textButton="Login with Facebook"
+                    cssClass="rounded-full px-2 py-2 bg-blue-300"
                      />
                 </span>   
                  <span className="m-4">
                 <GoogleLogin
                         clientId="857897877790-snl8r8eqb3jt8ccastqnfuqk7njbcjth.apps.googleusercontent.com"
                         buttonText="Login"
-                        onSuccess={this.responseGoogle}
-                        onFailure={this.responseGoogle}
+                            onSuccess={this.handleGoogleAuth}
+                            onFailure={this.handleGoogleAuth}
                         cookiePolicy={'single_host_origin'}
+                            buttonText="Login with Google"
+                            className="rounded-full-importent"
+                        
                     />
                  </span>
                 </div>
